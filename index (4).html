@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>IIDE AI Potential Calculator</title>
+
+<style>
+/* IIDE Light Theme Branding */
+:root {
+    --bg-main: #eef6fc; 
+    --bg-card: #ffffff; 
+    --border: #d2e3f0; 
+    --text-main: #1a1a1a; 
+    --text-muted: #5e6b7c; 
+    --accent: #2b358e; 
+    --accent-hover: #1f276b; 
+    --accent-red: #e31b23; 
+    --accent-green: #28a745; 
+    --track-bg: #e2e8f0; 
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-main);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.container {
+    width: 100%;
+    max-width: 480px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 40px 30px;
+    border-radius: 16px;
+    box-shadow: 0 12px 35px rgba(43, 53, 142, 0.08); 
+    position: relative;
+    overflow: hidden;
+}
+
+h2 { 
+    margin: 0 0 8px 0; 
+    font-size: 26px; 
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text-main);
+}
+
+p.subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 30px;
+    margin-top: 0;
+}
+
+label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Updated for Dropdown Select */
+select {
+    width: 100%;
+    padding: 14px;
+    margin: 8px 0 24px 0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: #f8fafc url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235e6b7c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 14px center;
+    background-size: 16px;
+    color: var(--text-main);
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    appearance: none; /* Removes default OS styling */
+    -webkit-appearance: none;
+    cursor: pointer;
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--accent);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(43, 53, 142, 0.1);
+}
+
+select:invalid {
+    color: var(--text-muted);
+}
+
+/* Error States */
+.input-error {
+    border-color: var(--accent-red) !important;
+    box-shadow: 0 0 0 3px rgba(227, 27, 35, 0.1) !important;
+}
+
+.error-text {
+    color: var(--accent-red);
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: -18px;
+    margin-bottom: 20px;
+    display: none; 
+}
+
+.slider-box {
+    margin: 0 0 24px 0;
+}
+
+.slider-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.slider-val {
+    font-weight: 700;
+    color: var(--accent);
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    background: transparent;
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 22px;
+    width: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    margin-top: -9px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    cursor: pointer;
+    background: var(--track-bg);
+    border-radius: 2px;
+}
+
+button {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 10px;
+    letter-spacing: 0.3px;
+}
+
+button:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(43, 53, 142, 0.2);
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 2px solid var(--border);
+    color: var(--text-muted);
+    margin-top: 15px;
+    font-weight: 600;
+}
+
+.btn-secondary:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: var(--text-main);
+    box-shadow: none;
+    transform: none;
+}
+
+.screen {
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    visibility: hidden;
+}
+.show {
+    opacity: 1;
+    transform: translateY(0);
+    position: relative;
+    visibility: visible;
+}
+
+.metric-container {
+    margin-top: 30px;
+}
+
+.metric {
+    margin: 20px 0;
+}
+
+.metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-main);
+    gap: 10px;
+}
+
+.metric-label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.metric-val {
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.text-accent {
+    color: var(--accent-green); 
+}
+
+.bar {
+    height: 8px;
+    background: var(--track-bg);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fill-red {
+    background: var(--accent-green); 
+}
+
+.future-circle {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 900;
+    background: conic-gradient(var(--accent) 0%, var(--track-bg) 0%);
+    transition: background 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+    color: var(--accent);
+}
+
+.future-circle::after {
+    content: '';
+    position: absolute;
+    width: 110px;
+    height: 110px;
+    background: var(--bg-card);
+    border-radius: 50%;
+    z-index: 1;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.circle-val {
+    position: relative;
+    z-index: 2;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div id="inputScreen" class="screen show">
+        <h2>AI Output Multiplier</h2>
+        <p class="subtitle">Calculate the exact value of your time.</p>
+
+        <label>Your Current Role</label>
+        <select id="jobRole" required>
+            <option value="" disabled selected hidden>Select your role...</option>
+            <option value="Student / Fresher">Student / Fresher</option>
+            <option value="Marketing / Sales">Marketing / Sales</option>
+            <option value="Data / Finance">Data Analyst / Finance</option>
+            <option value="Tech / Development">Tech / Development</option>
+            <option value="HR / Operations">HR / Operations</option>
+            <option value="Founder / Manager">Founder / Manager</option>
+            <option value="Other Professional">Other Professional</option>
+        </select>
+        <div id="roleError" class="error-text">Please select your role from the list.</div>
+
+        <div class="slider-box">
+            <div class="slider-label">
+                <label>Current AI Literacy</label>
+                <span id="aiVal" class="slider-val">10%</span>
+            </div>
+            <input type="range" min="0" max="100" value="10" id="aiUsage" oninput="updateValues()">
+        </div>
+
+        <div class="slider-box">
+            <div class="slider-label">
+                <label>Hours Worked Per Week</label>
+                <span id="hoursVal" class="slider-val">40</span>
+            </div>
+            <input type="range" min="10" max="80" value="40" id="hours" oninput="updateValues()">
+        </div>
+
+        <button onclick="showFuture()">Calculate ROI</button>
+    </div>
+
+    <div id="futureScreen" class="screen hidden">
+        <h2 id="resultTitle" style="font-size: 22px; text-align: center; color: var(--accent);">Your Future</h2>
+        <p class="subtitle" style="text-align: center;">Projected efficiency post-curriculum.</p>
+
+        <div class="future-circle" id="circle">
+            <span class="circle-val"><span id="circleNum">0</span>%</span>
+        </div>
+
+        <div class="metric-container">
+            <div class="metric">
+                <div class="metric-header">
+                    <span class="metric-label">Time Reclaimed</span>
+                    <span class="metric-val"><span id="timeSaved">0</span> hrs/wk</span>
+                </div>
+                <div class="bar"><div class="fill" id="bar1"></div></div>
+            </div>
+
+            <div class="metric">
+                <div class="metric-header">
+                    <span class="metric-label">Potential Increase in Income</span>
+                    <span class="metric-val text-accent">₹<span id="income">0</span>/yr</span>
+                </div>
+                <div class="bar"><div class="fill fill-red" id="bar2"></div></div>
+            </div>
+
+            <div class="metric">
+                <div class="metric-header">
+                    <span class="metric-label">Market Premium</span>
+                    <span class="metric-val"><span id="growth">0</span>%</span>
+                </div>
+                <div class="bar"><div class="fill" id="bar3"></div></div>
+            </div>
+        </div>
+
+        <button onclick="window.open('https://iide.co/ai-courses/online/', '_blank')">Explore IIDE's AI courses</button>
+        <button class="btn-secondary" onclick="resetCalculator()">Recalculate</button>
+    </div>
+
+</div>
+
+<script>
+// Clear error message when the user selects an option
+document.getElementById("jobRole").addEventListener("change", function() {
+    if (this.value !== "") {
+        document.getElementById("roleError").style.display = "none";
+        this.classList.remove("input-error");
+        this.style.color = "var(--text-main)"; // Make text dark once selected
+    }
+});
+
+function updateValues(){
+    document.getElementById("aiVal").innerText = document.getElementById("aiUsage").value + "%";
+    document.getElementById("hoursVal").innerText = document.getElementById("hours").value;
+}
+
+function animateValue(id, start, end, duration) {
+    let range = end - start;
+    let current = start;
+    let increment = end > start ? Math.ceil(range / (duration / 16)) : -1;
+    let obj = document.getElementById(id);
+    
+    let timer = setInterval(function() {
+        current += increment;
+        if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+            current = end;
+            clearInterval(timer);
+        }
+        obj.innerText = current.toLocaleString('en-IN'); 
+    }, 16); 
+}
+
+// Updated Logic to precisely match the dropdown options
+function getRoleMetrics(selectedRole) {
+    switch(selectedRole) {
+        case "Student / Fresher": return { rate: 800, premium: 0.65 };
+        case "Marketing / Sales": return { rate: 1800, premium: 0.50 };
+        case "Data / Finance": return { rate: 2200, premium: 0.55 };
+        case "Tech / Development": return { rate: 2500, premium: 0.45 };
+        case "HR / Operations": return { rate: 1500, premium: 0.45 };
+        case "Founder / Manager": return { rate: 3000, premium: 0.35 };
+        default: return { rate: 1500, premium: 0.40 }; // For "Other Professional"
+    }
+}
+
+function showFuture(){
+    let roleField = document.getElementById("jobRole");
+    let roleInput = roleField.value;
+    let errorText = document.getElementById("roleError");
+
+    // VALIDATION CHECK: Stop if they haven't selected an option
+    if (roleInput === "") {
+        errorText.style.display = "block";
+        roleField.classList.add("input-error");
+        return; 
+    }
+
+    let ai = parseInt(document.getElementById("aiUsage").value);
+    let hours = parseInt(document.getElementById("hours").value);
+
+    let metrics = getRoleMetrics(roleInput);
+
+    let futureAI = Math.min(ai + 65, 100); 
+    let timeSaved = Math.round((futureAI / 100) * hours * 0.45);
+    
+    let income = Math.round(timeSaved * metrics.rate * 52); 
+    let growth = Math.round(futureAI * metrics.premium);
+
+    // Update title (clean up strings like "Student / Fresher" to just "Student")
+    let displayRole = roleInput.split(' / ')[0]; 
+    if (displayRole === "Other Professional") displayRole = "Professional";
+    document.getElementById("resultTitle").innerText = "AI-Powered " + displayRole;
+
+    document.getElementById("inputScreen").classList.remove("show");
+    document.getElementById("inputScreen").classList.add("hidden");
+    
+    let futureScreen = document.getElementById("futureScreen");
+    futureScreen.classList.remove("hidden");
+    
+    setTimeout(() => {
+        futureScreen.classList.add("show");
+        
+        animateValue("circleNum", 0, futureAI, 1200);
+        animateValue("timeSaved", 0, timeSaved, 1000);
+        animateValue("income", 0, income, 1500);
+        animateValue("growth", 0, growth, 1000);
+
+        document.getElementById("bar1").style.width = Math.min((timeSaved / (hours * 0.5)) * 100, 100) + "%";
+        document.getElementById("bar2").style.width = "85%"; 
+        document.getElementById("bar3").style.width = growth + "%";
+
+        let circle = document.getElementById("circle");
+        circle.style.background = `conic-gradient(var(--accent) ${futureAI}%, var(--track-bg) ${futureAI}%)`;
+    }, 50);
+}
+
+function resetCalculator() {
+    document.getElementById("futureScreen").classList.remove("show");
+    document.getElementById("futureScreen").classList.add("hidden");
+    
+    // Reset the dropdown for the next try
+    let roleField = document.getElementById("jobRole");
+    roleField.value = "";
+    roleField.style.color = "var(--text-muted)";
+    
+    setTimeout(() => {
+        document.getElementById("inputScreen").classList.remove("hidden");
+        document.getElementById("inputScreen").classList.add("show");
+        
+        document.getElementById("bar1").style.width = "0%";
+        document.getElementById("bar2").style.width = "0%";
+        document.getElementById("bar3").style.width = "0%";
+        document.getElementById("circle").style.background = `conic-gradient(var(--accent) 0%, var(--track-bg) 0%)`;
+    }, 400);
+}
+
+updateValues();
+</script>
+
+</body>
+</html>
